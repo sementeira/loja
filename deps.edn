@@ -1,5 +1,6 @@
-{:paths ["/src/cljc"]
- :deps {danlentz/clj-uuid {:mvn/version "0.1.9"}
+{:paths ["/src/clj" "/src/cljc" "resources"]
+ :deps {com.draines/postal {:mvn/version "2.0.4"}
+        danlentz/clj-uuid {:mvn/version "0.1.9"}
         metosin/malli {:mvn/version "0.2.1"}
         org.clojure/clojure {:mvn/version "1.10.2-rc1"}
         tick/tick {:mvn/version "0.4.27-alpha"}}

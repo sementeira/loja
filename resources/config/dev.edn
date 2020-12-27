@@ -1,0 +1,7 @@
+{:domain "semente.xyz"
+ :mail-login
+ {:host "smtp.gmail.com"
+  :user "XXX@gmail.com"
+  :pass "XXX"
+  :port 587
+  :tls true}}
