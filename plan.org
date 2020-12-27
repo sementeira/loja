@@ -1,0 +1,131 @@
+* stack
+** enviar um email com Clojure
+   postal
+** use cases
+*** acrescentar categoria?
+    só programaticamente, por enquanto.
+** implementaçom
+*** um servidor em hetzner sobre crux com confluent backend
+*** images etc. em S3
+** mirar
+*** https://github.com/juxt/crux/blob/master/crux-test/test/crux/query_test.clj
+
+* estrategia
+
+** progressom lógica
+*** primeiro acrescentamos tendeiras
+    como fazemos isto?  ao começo está bem se mo mandam fazer manualmente,
+    porque nom parece umha operaçom frequente. mais tenho que estar pronto para
+    haver mais do que umha tendeira.
+
+    quem pode acrescentar tendeiras? para começar, eu (conetando diretamente à
+    DB) ou [v2] outra tendeira (via web?)
+
+    [v2] as tendeiras tamém podem editar os seus dados de contato sem
+    consultar-me a mim?
+
+    logo para umha [v1] só preciso umha funçom para acrescentar umha tendeira
+    dado um nome e email
+
+    as tendeiras tenhem que poder setear e mudar a sua senha.
+
+    vou ter que poder mandar email às tendeiras.  isso pode ser um bo sítio para
+    começar? a minha funçom cria a entrada pero sem hashed password, e envia um
+    email à tendeira para estabelecer a sua senha.  se esquecerem, nom me vam
+    emailar de novo!  clica (esquecestes a senha?) e pido que metam o email e
+    mando-lhe outra senha.
+
+    nom normalizo emails.
+
+**** nome
+**** email
+**** telefone
+*** depois acrescentamos produtos
+*** depois as clientes procuram e miram os produtos
+*** depois metem produtos no seu carrinho
+*** depois vam a checkout e pagam
+** ir do modelo para fora, está-me indo moito melhor assi
+   parsimónia em meter-me com cljs
+   parsimónia em meter-me com DB?
+   com que me meto lo?
+   estaria bem ter um módulo de core logic ou algo
+   acho que o UI pode ser mais informativo que o DB?
+** gerir pesos e gastos de envio vai para umha versom 2!
+
+* problem statement
+
+  Fazer umha loja online para a Semente.  Venderám-se camisolas, livros,
+  crachás, brinquedos, etc.
+
+  As clientes devem poder descobrir facilmente o que hai para vender, bem por
+  navegaçom por categorias, bem por procura por keywords. Podem acrescentar
+  produtos ao seu carro da compra, podem retirá-los, podem revisar o carro da
+  compra, e quando estiverem satisfeitas podem comprar. Para isso tenhem que
+  entrar os dados de pagamento em Stripe e os dados de envio. O site calcula
+  gastos de envio segundo peso e tamanho da mercadoria e lugar do envio (ver
+  tarifas de correios). Tamém tenhem que dar algum dado de contato (email,
+  telefone?) para trackeado do envio.
+
+  **Mirar leis de proteçom de dados.**
+
+  Damos-lhe à utente a opçom de salvar os seus dados de pagamento e envio
+  abrindo umha conta. Pode ter mais de um endereço de envio e mais do que um
+  cartom.
+
+  As gestoras da tenda recebem notificaçom em tempo real (horas configuráveis
+  pola gestora, default 9-5) dos pedidos e podem marcá-los como enviados.
+  Quando isto acontecer, o cliente pode receber umha notificaçom. Numha
+  primeira versom, o flow acaba aqui e o seguimento da entrega é, no seu caso,
+  manual.
+
+  Um bo toque seria ter um email da tenda que guardasse todas as mensagens das
+  clientes, e todas as interaçons entre clientes e tendeiras... mais algum dia;
+  nom é urgente agora.
+
+
+* modelo de dados
+** user
+*** name
+*** role
+   tendeiras ou clientes
+*** hashed password
+** delivery address
+   nom nos preocupar com billing address até alguém nos pedir fatura.
+*** nome
+*** lugar/rua
+*** número, piso etc.
+*** código postal
+*** província/regiom/etc.
+*** estado
+** payment-method
+   ver o que requer stripe
+   permitir tamém paypal? ver fees.
+** category
+   e.g. camisolas
+*** nome
+*** descriçom
+** product
+   e.g. camisola ramalho.  hai-na em diferentes cores e tamanhos. quando
+   procuramos cousas que comprar, a página mínima é esta.  depois pode haver
+   diferentes selectores para tamanho, cor, etc.
+*** categoria
+*** nome
+*** descriçom
+** merc
+   e.g. camisola dumha cor e tamanho concreta. todos estes elementos som
+   intercambiáveis.
+** color
+   a cor dumha merc
+*** nome
+*** r
+*** g
+*** b
+** size
+   o tamanho dumha merc
+*** o id é um keyword
+*** nome
+*** peso vai aqui?
+    nom, tamanho é só um marcador.
+    é opcional; hai cousas que nom tenhem tamanhos e tenhem peso
+    podemos modelá-las como que tenhem um tamanho único?
+    :default
