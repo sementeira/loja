@@ -2,6 +2,8 @@
  :deps {buddy/buddy-core {:mvn/version "1.9.0"}
         com.draines/postal {:mvn/version "2.0.4"}
         danlentz/clj-uuid {:mvn/version "0.1.9"}
+        juxt/crux-core {:mvn/version "20.12-1.13.0-beta"}
+        juxt/crux-lmdb {:mvn/version "20.12-1.13.0-alpha"}
         metosin/malli {:mvn/version "0.2.1"}
         org.clojure/clojure {:mvn/version "1.10.2-rc1"}
         tick/tick {:mvn/version "0.4.27-alpha"}}

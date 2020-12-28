@@ -1,15 +1,14 @@
 (ns loja.email
-  (:require [loja.config :as config]
-            [postal.core :as postal]))
+  (:require [postal.core :as postal]))
 
-(defn send-email [{:keys [to subject body]}]
-  (let [{:keys [domain mail-login]} (config/load "dev")]
-    (postal/send-message
-     mail-login
-     {:from (str "Loja Semente <loja@" domain ">")
-      :to to
-      :subject subject
-      :body body})))
+(defn send-email [{:keys [domain mail-login]}
+                  {:keys [to subject body]}]
+  (postal/send-message
+   mail-login
+   {:from (str "Loja Semente <loja@" domain ">")
+    :to to
+    :subject subject
+    :body body}))
 
 (comment
 

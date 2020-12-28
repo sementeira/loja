@@ -9,7 +9,6 @@
 (def ^:private bytes->b64u-str (comp codecs/bytes->str codecs/bytes->b64u))
 (def ^:private b64u-str->bytes (comp codecs/b64u->bytes codecs/to-bytes))
 
-
 (defn urlsafe-encrypt
   "password should be a string at least 32 chars long"
   [data password]

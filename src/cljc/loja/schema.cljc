@@ -20,17 +20,20 @@
    [:loja.shopkeeper/display-name nestr]
    ;; in addition, it must be unique in the DB
    [:loja.shopkeeper/email #"^[^@]+@[^@]+\.[^\.@]+$"]
-   [:loja.shopkeeper/hashed-password nestr]])
+   [:loja.shopkeeper/hashed-password {:optional true} nestr]])
 
 (def shopkeeper? (m/validator shopkeeper))
+(def shopkeeper-explainer (m/explainer shopkeeper))
 
 (comment
   (shopkeeper?
    {:crux.db/id (uuid/v1)
     :loja.shopkeeper/display-name "es"
-    :loja.shopkeeper/email "es@casa.gal"
-    :loja.shopkeeper/phone "555555555"
-    :loja.shopkeeper/hashed-password "somepasshash"})
+    :loja.shopkeeper/email "es@casa.gal."})
+  (shopkeeper-explainer
+   {:crux.db/id (uuid/v1)
+    :loja.shopkeeper/display-name "es"
+    :loja.shopkeeper/email "es@casa.gal."})
   (m/validate #"a+b+c+" "abbccc")
 ;; => true
   (m/validate [:re ".{3,5}"] "abcdefg")
