@@ -9,6 +9,11 @@
 (defn add-transaction-function! [k body]
   (alter-var-root #'transaction-functions assoc k body))
 
+(defn sync-tx [crux-node tx-data]
+  (let [tx (crux/submit-tx crux-node tx-data)]
+    (crux/sync crux-node)
+    (crux/tx-committed? crux-node tx)))
+
 (defn- upsert-functions! [crux-node]
   (some->> (seq
             (doall
@@ -21,18 +26,13 @@
                    :when (not= old-body body)]
                [:crux.tx/put {:crux.db/id k
                               :crux.db/fn body}])))
-    (crux/submit-tx crux-node)))
+    (sync-tx crux-node)))
 
 (defn q [crux-node query]
   (crux/q (crux/db crux-node) query))
 
 (defn q1 [crux-node query]
   (ffirst (q crux-node query)))
-
-(defn sync-tx [crux-node tx-data]
-  (let [tx (crux/submit-tx crux-node tx-data)]
-    (crux/sync crux-node)
-    (crux/tx-committed? crux-node tx)))
 
 (defn update-entity [crux-node eid f & args]
   (let [e (crux/entity (crux/db crux-node) eid)]

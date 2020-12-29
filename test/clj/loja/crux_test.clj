@@ -40,7 +40,7 @@
         eid (uuid/v1)]
     (is (= {:inc-attr fn-body}
            @#'sut/transaction-functions))
-    #_(is (= fn-body
+    (is (= fn-body
            (sut/q1 node '{:find [body]
                           :where [[:inc-attr :crux.db/fn body]]})))
     (sut/sync-tx
