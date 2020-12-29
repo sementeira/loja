@@ -1,5 +1,6 @@
 {:paths ["src/clj" "src/cljc" "resources"]
- :deps {buddy/buddy-core {:mvn/version "1.9.0"}
+ :deps {better-cond {:mvn/version "2.1.0"}
+        buddy/buddy-core {:mvn/version "1.9.0"}
         com.draines/postal {:mvn/version "2.0.4"}
         danlentz/clj-uuid {:mvn/version "0.1.9"}
         hiccup {:mvn/version "1.0.5"}
