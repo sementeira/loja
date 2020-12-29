@@ -1,4 +1,4 @@
-{:paths ["/src/clj" "/src/cljc" "resources"]
+{:paths ["src/clj" "src/cljc" "resources"]
  :deps {buddy/buddy-core {:mvn/version "1.9.0"}
         com.draines/postal {:mvn/version "2.0.4"}
         danlentz/clj-uuid {:mvn/version "0.1.9"}
@@ -8,5 +8,6 @@
         org.clojure/clojure {:mvn/version "1.10.2-rc1"}
         tick/tick {:mvn/version "0.4.27-alpha"}}
  :aliases
- {:dev {:extra-paths ["/alias/dev/src/clj"]}
-  :cljs-dev {:extra-deps {binaryage/devtools {:mvn/version "1.0.2"}}}}}
+ {:dev {:extra-paths ["alias/dev/src/clj"]}
+  :cljs-dev {:extra-deps {binaryage/devtools {:mvn/version "1.0.2"}}}
+  :test {:extra-paths ["test/clj" "test/cljc"]}}}
