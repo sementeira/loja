@@ -30,12 +30,24 @@
   (html5-ok "Echo" [[:div "Prova dous"]
                     [:pre (with-out-str (pprint req))]]))
 
-(defn handler [crux-node]
+(defn handle-callback [crux-node password req]
+  (html5-ok "Callback" [[:div "Now I would handle callback"]
+                        [:pre (with-out-str (pprint req))]]) )
+
+(defn handler [crux-node password]
   (rring/ring-handler
    (rring/router
-    [["/prova" #(handle crux-node %)]])
+    [["/prova" #(handle crux-node %)]
+     ["/pr" #(html5-ok "Yes" [[:div "Got it"] [:pre (pr-str %)]])]
+     ["/cb/:payload" #(handle-callback crux-node password %)]])
    (rring/create-default-handler
     {:not-found (constantly (not-found "Que?"))})))
+
+(defn dev-handler
+  "Creates the handler for every request, for REPL friendliness"
+  [crux-node password]
+  (fn [req]
+    ((handler crux-node password) req)))
 
 (defn start-server [http-port http-handler]
   (let [port (or http-port 62000)]
@@ -43,6 +55,7 @@
 
 (defn stop-server [server]
   (.stop ^Server server))
+
 
 (comment
 

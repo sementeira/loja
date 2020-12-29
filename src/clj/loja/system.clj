@@ -3,9 +3,14 @@
    [loja.crux :as crux]
    [loja.web :as web]))
 
-(defn start [{:keys [crux-dir http-port]}]
+(defn start [{:keys [crux-dir
+                     dev-http-handler?
+                     http-port
+                     password]}]
   (let [crux-node (crux/crux-node crux-dir)
-        handler (web/handler crux-node)
+        handler ((if dev-http-handler? web/dev-handler web/handler)
+                 crux-node
+                 password)
         http-server (web/start-server http-port handler)]
     {:crux-node crux-node
      :http-server http-server}))
