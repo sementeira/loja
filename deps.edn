@@ -15,7 +15,5 @@
   {:extra-deps  {cloverage/cloverage {:mvn/version "RELEASE"}}
    :main-opts   ["-m" "cloverage.coverage"
                  "--src-ns-path" "src/clj"
-                 "--test-ns-path" "test/clj"]
-   :exec-fn     cloverage.coverage/run-project
-   :exec-args   {:src-ns-path  ["src/clj"]
-                 :test-ns-path ["test/clj"]}}}}
+                 "--test-ns-path" "test/clj"
+                 "--ns-exclude-regex" "loja\\.email|loja\\.ops"]}}}
