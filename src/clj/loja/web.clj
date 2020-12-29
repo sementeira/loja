@@ -3,6 +3,7 @@
    [clojure.pprint :refer [pprint]]
    [hiccup.core :refer [html]]
    [hiccup.page :refer [doctype]]
+   [loja.crypto :as crypto]
    [reitit.ring :as rring]
    [ring.adapter.jetty :as jetty]
    [ring.util.http-response :refer [content-type ok not-found]])
@@ -30,16 +31,21 @@
   (html5-ok "Echo" [[:div "Prova dous"]
                     [:pre (with-out-str (pprint req))]]))
 
-(defn handle-callback [crux-node password req]
-  (html5-ok "Callback" [[:div "Now I would handle callback"]
+(defn handle-callback [crux-node
+                       password
+                       {{:keys [payload]} :path-params
+                        :as req}]
+  (html5-ok "Callback" [[:div (str "Now I would handle callback with payload "
+                                   (pr-str
+                                    (crypto/decrypt-urlsafe payload password)))]
                         [:pre (with-out-str (pprint req))]]) )
 
 (defn handler [crux-node password]
   (rring/ring-handler
    (rring/router
-    [["/prova" #(handle crux-node %)]
-     ["/pr" #(html5-ok "Yes" [[:div "Got it"] [:pre (pr-str %)]])]
-     ["/cb/:payload" #(handle-callback crux-node password %)]])
+    [["/prova" {:get #(handle crux-node %)}]
+     ["/pr" {:get #(html5-ok "Yes" [[:div "Got it"] [:pre (pr-str %)]])}]
+     ["/cb/:payload" {:get #(handle-callback crux-node password %)}]])
    (rring/create-default-handler
     {:not-found (constantly (not-found "Que?"))})))
 

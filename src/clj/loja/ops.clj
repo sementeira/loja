@@ -28,6 +28,8 @@ Para criar a tua senha clica no seguinte endereço:
              (crypto/urlsafe-encrypt
               [:set-password
                {:id eid
+                ;; XXX: make this the expiration, and refer to that in the
+                ;; message body.
                 :t (System/currentTimeMillis)}]
               password))})
     (throw (ex-info "could not transact shopkeeper" {}))))
@@ -35,7 +37,8 @@ Para criar a tua senha clica no seguinte endereço:
 (comment
   (require '[loja.config :as config])
   (require '[crux.api :as crux])
-  (def node (crux/start-node {}))
+  (require '[loja.system :as system])
+  (def node (:crux-node system/system))
   (add-shopkeeper (assoc (config/load "dev")
                          :crux-node node)
                   "Manolo Peres"
