@@ -3,8 +3,9 @@
    [clojure.pprint :refer [pprint]]
    [hiccup.core :refer [html]]
    [hiccup.page :refer [doctype]]
+   [reitit.ring :as rring]
    [ring.adapter.jetty :as jetty]
-   [ring.util.http-response :refer [content-type ok]])
+   [ring.util.http-response :refer [content-type ok not-found]])
   (:import [org.eclipse.jetty.server Server]))
 
 (defn- html5-ok
@@ -26,12 +27,15 @@
        (content-type "text/html; charset=utf-8"))))
 
 (defn handle [crux-node req]
-  (html5-ok "Echo" [[:div "Prova"]
+  (html5-ok "Echo" [[:div "Prova dous"]
                     [:pre (with-out-str (pprint req))]]))
 
 (defn handler [crux-node]
-  (fn [req]
-    (handle crux-node req)))
+  (rring/ring-handler
+   (rring/router
+    [["/prova" #(handle crux-node %)]])
+   (rring/create-default-handler
+    {:not-found (constantly (not-found "Que?"))})))
 
 (defn start-server [http-port http-handler]
   (let [port (or http-port 62000)]
@@ -40,3 +44,34 @@
 (defn stop-server [server]
   (.stop ^Server server))
 
+(comment
+
+  (def req {:ssl-client-cert nil,
+            :protocol "HTTP/1.1",
+            :remote-addr "127.0.0.1",
+            :headers
+            {"accept"
+             "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+             "upgrade-insecure-requests" "1",
+             "user-agent"
+             "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0",
+             "connection" "keep-alive",
+             "host" "localhost:62000",
+             "accept-language" "gl-GL,gl;q=0.8,en-US;q=0.5,en;q=0.3",
+             "accept-encoding" "gzip, deflate"},
+            :server-port 62000,
+            :content-length nil,
+            :content-type nil,
+            :character-encoding nil,
+            :uri "/provaxxx",
+            :server-name "localhost",
+            :query-string nil,
+            :body nil
+            :scheme :http,
+            :request-method :get})
+
+  (def h (handler nil))
+
+  (h req)
+
+  )
