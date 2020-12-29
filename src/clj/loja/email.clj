@@ -12,8 +12,12 @@
 
 (comment
 
-  (send-email {:to "euccastro@gmail.com"
-               :subject "Olá mais umha vez da loja!"
-               :body "Isto é o corpo do email"})
+  (require '[loja.config :as cfg])
+  (send-email
+   (cfg/load "dev")
+   {:to "euccastro@gmail.com"
+    :subject "Sabes que?"
+    :body "O leite mola!"})
+;; => {:code 0, :error :SUCCESS, :message "messages sent"}
 
   )

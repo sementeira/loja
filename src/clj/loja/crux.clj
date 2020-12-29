@@ -10,15 +10,17 @@
   (alter-var-root #'transaction-functions assoc k body))
 
 (defn- upsert-functions! [crux-node]
-  (some->> (seq (for [[k body] transaction-functions
-                      :let [old-body
-                            (:crux.db/fn
-                              (crux/entity
-                               (crux/db crux-node)
-                               k))]
-                      :when (not= old-body body)]
-                  [:crux.tx/put {:crux.db/id k
-                                 :crux.db/fn body}]))
+  (some->> (seq
+            (doall
+             (for [[k body] transaction-functions
+                   :let [old-body
+                         (:crux.db/fn
+                           (crux/entity
+                            (crux/db crux-node)
+                            k))]
+                   :when (not= old-body body)]
+               [:crux.tx/put {:crux.db/id k
+                              :crux.db/fn body}])))
     (crux/submit-tx crux-node)))
 
 (defn q [crux-node query]

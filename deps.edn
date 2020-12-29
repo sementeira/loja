@@ -10,4 +10,12 @@
  :aliases
  {:dev {:extra-paths ["alias/dev/src/clj"]}
   :cljs-dev {:extra-deps {binaryage/devtools {:mvn/version "1.0.2"}}}
-  :test {:extra-paths ["test/clj" "test/cljc"]}}}
+  :test {:extra-paths ["test/clj" "test/cljc"]}
+  :coverage
+  {:extra-deps  {cloverage/cloverage {:mvn/version "RELEASE"}}
+   :main-opts   ["-m" "cloverage.coverage"
+                 "--src-ns-path" "src/clj"
+                 "--test-ns-path" "test/clj"]
+   :exec-fn     cloverage.coverage/run-project
+   :exec-args   {:src-ns-path  ["src/clj"]
+                 :test-ns-path ["test/clj"]}}}}
