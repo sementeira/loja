@@ -40,12 +40,12 @@
              [[:crux.tx/match eid e]
               [:crux.tx/put (apply f e args)]])))
 
-(defn crux-node [dir]
+(defn crux-node [{:keys [crux-dir]}]
   (let [node
         (crux/start-node
-         (if dir
+         (if crux-dir
            {:gold-store {:crux/module 'crux.lmdb/->kv-store
-                         :db-dir (io/file dir)}
+                         :db-dir (io/file crux-dir)}
             ;; I don't bother with an index store,
             ;; since I expect I'll have small DBs
             :crux/document-store {:kv-store :gold-store}
@@ -56,3 +56,9 @@
 
 (defn close [^ICruxAPI crux-node]
   (.close crux-node))
+
+(comment
+
+  (.close (crux-node nil))
+
+  )

@@ -13,7 +13,7 @@
     (sut/close node)))
 
 (deftest crux-node
-  (let [node (sut/crux-node "target/tmp/db")
+  (let [node (sut/crux-node {:crux-dir "target/tmp/db"})
         eid (or (sut/q1 node
                         '{:find [eid]
                           :where [[eid :test "data"]]})
