@@ -3,6 +3,7 @@
             [buddy.core.crypto :as crypto]
             [buddy.core.hash :as hash]
             [buddy.core.nonce :as nonce]
+            [buddy.hashers :as hashers]
             [clojure.edn :as edn]
             [clojure.string :as str]))
 
@@ -28,6 +29,9 @@
     (edn/read-string
      (codecs/bytes->str bs))))
 
+(def hash-password hashers/derive)
+
+(def check-password hashers/check)
 
 (comment
   (-> {:a "provando 123..."}

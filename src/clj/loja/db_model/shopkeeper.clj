@@ -1,8 +1,9 @@
+
 (ns loja.db-model.shopkeeper
-  (:require [buddy.hashers :as hashers]
-            [clj-uuid :as uuid]
+  (:require [clj-uuid :as uuid]
             [crux.api :as crux]
             [loja.schema :as schema]
+            [loja.crypto :as crypto]
             [loja.crux :as lcrux]))
 
 (defn add-shopkeeper [crux-node display-name email]
@@ -31,7 +32,7 @@
   (lcrux/update-entity
    crux-node
    eid
-   assoc :loja.shopkeeper/password (hashers/derive password)))
+   assoc :loja.shopkeeper/password (crypto/hash-password password)))
 
 (comment
 

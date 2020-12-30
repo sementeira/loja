@@ -2,7 +2,8 @@
   (:require [loja.db-model.shopkeeper :as sut]
             [clojure.test :as t :refer [deftest is]]
             [crux.api :as crux]
-            [loja.crux :as lcrux]))
+            [loja.crux :as lcrux]
+            [loja.crypto :as crypto]))
 
 (def ^:dynamic *crux-node* nil)
 
@@ -14,7 +15,7 @@
 
 (t/use-fixtures :each with-crux)
 
-(deftest prova
+(deftest add-shopkeeper
   (let [eid (sut/add-shopkeeper
              *crux-node*
              "Manolo Gomes"
@@ -29,9 +30,22 @@
                                              "Joaquim Gomes"
                                              "manolo@gomes.gal")))))
 
-(deftest prova-invalid-data
+(deftest invalid-data
   (is (thrown? clojure.lang.ExceptionInfo
                (sut/add-shopkeeper
                 *crux-node*
                 "Joaquim Gomes"
                 "manolo@gomes@gal"))))
+
+(deftest set-password
+  (let [eid (sut/add-shopkeeper
+             *crux-node*
+             "Manolo Gomes"
+             "manolo@gomes.gal")]
+    (is (sut/set-password *crux-node* eid "abracadabra"))
+    (is (crypto/check-password
+         "abracadabra"
+         (lcrux/q1
+          *crux-node*
+          {:find ['pass]
+           :where [[eid :loja.shopkeeper/password 'pass]]})))))

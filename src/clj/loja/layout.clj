@@ -21,3 +21,5 @@
            ~@body]])
        ok
        (content-type "text/html; charset=utf-8"))))
+
+(html5-ok "" "");; => {:status 200, :headers {"Content-Type" "text/html; charset=utf-8"}, :body "<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\" /><meta content=\"width=device-width, initial-scale=1.0\" name=\"viewport\" /><title></title></head><body></body></html>"}
