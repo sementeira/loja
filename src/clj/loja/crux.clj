@@ -5,7 +5,6 @@
 
 (defonce ^:private transaction-functions {})
 
-
 (defn add-transaction-function! [k body]
   (alter-var-root #'transaction-functions assoc k body))
 

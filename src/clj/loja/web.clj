@@ -1,53 +1,47 @@
 (ns loja.web
   (:require
    [clojure.pprint :refer [pprint]]
-   [hiccup.core :refer [html]]
-   [hiccup.page :refer [doctype]]
-   [loja.crypto :as crypto]
+   [loja.layout :refer [html5-ok]]
+   [loja.reset-password :as rp]
    [reitit.ring :as rring]
    [ring.adapter.jetty :as jetty]
-   [ring.util.http-response :refer [content-type ok not-found]])
+  #_ [ring.middleware.anti-forgery :refer [*anti-forgery-token*
+                                         wrap-anti-forgery]]
+   [ring.middleware.keyword-params :refer [wrap-keyword-params]]
+   [ring.middleware.params :refer [wrap-params]]
+  #_ [ring.middleware.session :refer [wrap-session]]
+   [ring.util.http-response :refer [not-found]])
   (:import [org.eclipse.jetty.server Server]))
 
-(defn- html5-ok
-  ([title body]
-   (html5-ok title [] body))
-  ([title head body]
-   (-> (html
-        (doctype :html5)
-        `[:html
-          [:head
-           [:meta {:charset "UTF-8"}]
-           [:meta {:name "viewport"
-                   :content "width=device-width, initial-scale=1.0"}]
-           [:title ~title]
-           ~@head]
-          [:body
-           ~@body]])
-       ok
-       (content-type "text/html; charset=utf-8"))))
 
-(defn handle [crux-node req]
-  (html5-ok "Echo" [[:div "Prova dous"]
+(defn echo [crux-node req]
+  (html5-ok "Echo" [[:div "Prova três"]
                     [:pre (with-out-str (pprint req))]]))
 
-(defn handle-callback [crux-node
-                       password
-                       {{:keys [payload]} :path-params
-                        :as req}]
-  (html5-ok "Callback" [[:div (str "Now I would handle callback with payload "
-                                   (pr-str
-                                    (crypto/decrypt-urlsafe payload password)))]
-                        [:pre (with-out-str (pprint req))]]) )
-
-(defn handler [crux-node password]
+(defn routes [crux-node password]
   (rring/ring-handler
    (rring/router
-    [["/prova" {:get #(handle crux-node %)}]
-     ["/pr" {:get #(html5-ok "Yes" [[:div "Got it"] [:pre (pr-str %)]])}]
-     ["/cb/:payload" {:get #(handle-callback crux-node password %)}]])
+    [["/echo" {:get #(echo crux-node %)}]
+     ["/cb/:payload" {:get (fn [{{:keys [payload]} :path-params
+                                 :as req}]
+                             (rp/handle-callback
+                              crux-node
+                              password
+                              payload))}]
+     ["/estabelece-senha" {:post (fn [{{:keys [payload pass1 pass2]} :params
+                                       :as req}]
+                                   (rp/reset-password crux-node
+                                                      password
+                                                      payload
+                                                      pass1
+                                                      pass2))}]])
    (rring/create-default-handler
     {:not-found (constantly (not-found "Que?"))})))
+
+(defn handler [crux-node password]
+  (-> (routes crux-node password)
+      wrap-keyword-params
+      wrap-params))
 
 (defn dev-handler
   "Creates the handler for every request, for REPL friendliness"
@@ -65,6 +59,7 @@
 
 (comment
 
+  (require '[miracle.save :as ms])
   (def req {:ssl-client-cert nil,
             :protocol "HTTP/1.1",
             :remote-addr "127.0.0.1",

@@ -1,10 +1,11 @@
 (ns loja.db-model.shopkeeper
-  (:require [clj-uuid :as uuid]
+  (:require [buddy.hashers :as hashers]
+            [clj-uuid :as uuid]
             [crux.api :as crux]
             [loja.schema :as schema]
             [loja.crux :as lcrux]))
 
-(defn add-shopkeeper [{:keys [crux-node]} display-name email]
+(defn add-shopkeeper [crux-node display-name email]
   (when (seq
          (crux/q
           (crux/db crux-node)
@@ -25,11 +26,17 @@
             [:crux.tx/put e]])
       eid)))
 
+(defn set-password [crux-node eid password]
+  (lcrux/update-entity
+   crux-node
+   eid
+   assoc :loja.shopkeeper/password (hashers/derive password)))
+
 (comment
 
   (def crux-node (crux/start-node {}))
 
-  (add-shopkeeper {:crux-node crux-node} "Manolo Gomes" "manolo@gomes.gal")
+  (add-shopkeeper crux-node "Manolo Gomes" "manolo@gomes.gal")
 
   (lcrux/close crux-node)
   )

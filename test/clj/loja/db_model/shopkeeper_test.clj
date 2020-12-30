@@ -16,7 +16,7 @@
 
 (deftest prova
   (let [eid (sut/add-shopkeeper
-             {:crux-node *crux-node*}
+             *crux-node*
              "Manolo Gomes"
              "manolo@gomes.gal")]
     (is (uuid? eid))
@@ -25,13 +25,13 @@
             :loja.shopkeeper/display-name "Manolo Gomes"
             :loja.shopkeeper/email "manolo@gomes.gal"}))
     (is (thrown? clojure.lang.ExceptionInfo (sut/add-shopkeeper
-                                             {:crux-node *crux-node*}
+                                             *crux-node*
                                              "Joaquim Gomes"
                                              "manolo@gomes.gal")))))
 
 (deftest prova-invalid-data
   (is (thrown? clojure.lang.ExceptionInfo
                (sut/add-shopkeeper
-                {:crux-node *crux-node*}
+                *crux-node*
                 "Joaquim Gomes"
                 "manolo@gomes@gal"))))
