@@ -1,7 +1,11 @@
 {:domain "semente.xyz"
- :mail-login
- {:host "smtp.gmail.com"
-  :user "XXX@gmail.com"
-  :pass "XXX"
-  :port 587
-  :tls true}}
+ :http-port 62000
+ :dev-http-handler? true
+ :callback-host "http://localhost:62000"
+ :password "abracadabra"
+ :dev-scenarios [(add-shopkeeper "Manolo Gomes" "euccastro@gmail.com" "abracadabra")]
+ :mail-login {:host "smtp.gmail.com"
+              :user "XXX@gmail.com"
+              :pass "XXX"
+              :port 587
+              :tls true}}
