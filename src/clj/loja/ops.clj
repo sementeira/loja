@@ -3,12 +3,19 @@
             [loja.crypto :as crypto]
             [loja.email :as email]))
 
+(def one-day-ms (* 1000 60 60 24))
+
+(def expiration-days 3)
+
 (def ^:private msg
-  "Olá,
+  (format
+   "Olá,
 
-Para criar a tua senha clica no seguinte endereço:
+Para criar a tua senha clica no seguinte endereço (caduca em %s dias):
 
-")
+"
+   expiration-days))
+
 
 (defn add-shopkeeper [{:keys [callback-host
                               callback-path
@@ -30,7 +37,8 @@ Para criar a tua senha clica no seguinte endereço:
                {:id eid
                 ;; XXX: make this the expiration, and refer to that in the
                 ;; message body.
-                :t (System/currentTimeMillis)}]
+                :expiration (+ (System/currentTimeMillis)
+                               (* one-day-ms expiration-days))}]
               password))})
     (throw (ex-info "could not transact shopkeeper" {}))))
 
