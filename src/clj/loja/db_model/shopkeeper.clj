@@ -27,6 +27,7 @@
       eid)))
 
 (defn set-password [crux-node eid password]
+  (assert (crux/entity (crux/db crux-node) eid))
   (lcrux/update-entity
    crux-node
    eid

@@ -21,7 +21,7 @@ Para estabelecer a tua senha clica no seguinte endereço (caduca em %s dias):
    expiration-days))
 
 (defn reset-password-body
-  [callback-host eid password]
+  [callback-host eid password dbg-expired?]
   (str
    msg
    callback-host
@@ -30,38 +30,54 @@ Para estabelecer a tua senha clica no seguinte endereço (caduca em %s dias):
     [:set-password
      {:id eid
       :expiration (+ (System/currentTimeMillis)
-                     (* one-day-ms expiration-days))}]
+                     (if dbg-expired?
+                       -1
+                       (* one-day-ms expiration-days)))}]
     password)))
+
+(defn send-reset-email [{:keys [callback-host
+                                password]
+                         :as system}
+                        email
+                        eid
+                        dbg-expired?]
+  (email/send-email
+   system
+   {:to email
+    :subject "Invitaçom para atender a loja da Semente"
+    :body (reset-password-body
+           callback-host
+           eid
+           password
+           dbg-expired?)}))
 
 (defn add-shopkeeper
   "To call from the REPL"
-  [{:keys [callback-host
-           crux-node
-           password]
-    :as system}
-   display-name
-   email]
-  (if-let [eid (db-sk/add-shopkeeper crux-node display-name email)]
-    (email/send-email
-     system
-     {:to email
-      :subject "Invitaçom para atender a loja da Semente"
-      :body (reset-password-body
-             callback-host
-             eid
-             password)})
-    (throw (ex-info "could not transact shopkeeper" {}))))
+  ([system display-name email]
+   (add-shopkeeper system display-name email false))
+  ([{:keys [callback-host
+            crux-node
+            password]
+     :as system}
+    display-name
+    email
+    dbg-expired?]
+   (if-let [eid (db-sk/add-shopkeeper crux-node display-name email)]
+     (send-reset-email system email eid dbg-expired?)
+     (throw (ex-info "could not transact shopkeeper" {})))))
 
-(defn handle-callback [_ password payload]
+(def errors
+  {"nom-quadram" "As senhas nom quadram"})
+
+(defn handle-callback [password payload error]
   (let [[op {:keys [expiration]}]
         (crypto/decrypt-urlsafe payload password)]
     (assert (= op :set-password))
     (if (< expiration (System/currentTimeMillis))
-      (html5-ok "Ligaçom caducada"
-                [[:h1 "Ligaçom caducada"]
-                 [:p "Passou o dia, passou a romaria."]])
+      (see-other "/caducada")
       (html5-ok "Estabelece a tua senha"
                 [[:h1 "Estabelece a tua senha"]
+                 (when error [:div {:style "color: red"} (errors error)])
                  [:form {:method :post
                          :action "/estabelece-senha"}
                   [:input#payload {:type :hidden
@@ -84,22 +100,22 @@ Para estabelecer a tua senha clica no seguinte endereço (caduca em %s dias):
     (assert (= op :set-password))
     (cond
       (< expiration (System/currentTimeMillis))
-      ;; XXX: redirect
-      (html5-ok "Ligaçom caducada"
-                [[:h1 "Ligaçom caducada"]
-                 [:p "Passou o dia, passou a romaria."]])
+      (see-other "/caducada")
       (not= pass1 pass2)
-      ;; XXX: redirect
-      (html5-ok "As senhas nom quadram"
-                [[:h1 "As senhas nom quadram"]
-                 [:p "Tenta de novo (XXX ligaçom)"]])
+      (see-other (str "/cb/" payload "?erro=nom-quadram"))
       :else
       (do
         (assert (db-sk/set-password crux-node id pass1))
-        ;; XXX: redirect
-        (html5-ok "Agora estabeleceria-che a senha"
+        ;; XXX: log in and redirect to admin page
+        (html5-ok "Tudo bem"
                   [[:h1 "Tudo bem"]
-                   [:p "Agora restabeleceria-che a senha"]])))))
+                   [:p "Agora redirigiria-che à página de gestom da loja."]])))))
+
+(defn expired-link []
+  (html5-ok "Ligaçom caducada"
+            [[:h1 "Ligaçom caducada"]
+             [:p "Passou o dia, passou a romaria."]]))
+
 (comment
   (do
     (require '[loja.config :as config])
@@ -118,10 +134,30 @@ Para estabelecer a tua senha clica no seguinte endereço (caduca em %s dias):
    (lcrux/q1 node '{:find [pass]
                     :where [[_ :loja.shopkeeper/password pass]]}))
 
+  ;; send reset email for existing shopkeeper
+  (let [[[eid email]]
+        (seq
+         (lcrux/q
+          node
+          '{:find [eid email]
+            :where [[eid :loja.shopkeeper/email email]]}))]
+    (send-reset-email (assoc (config/load "dev")
+                             :crux-node node)
+                      email
+                      eid
+                      false))
+
   (add-shopkeeper (assoc (config/load "dev")
                          :crux-node node)
                   "Manolo Peres"
                   "euccastro@gmail.com")
+
+  ;; to test expiration
+  (add-shopkeeper (assoc (config/load "dev")
+                         :crux-node node)
+                  "Manolo Peres"
+                  "euccastro@gmail.com"
+                  true)
 
   (.close node)
   )

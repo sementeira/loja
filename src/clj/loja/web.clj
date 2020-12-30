@@ -22,12 +22,14 @@
   (rring/ring-handler
    (rring/router
     [["/echo" {:get #(echo crux-node %)}]
+     ["/caducada" {:get (fn [_] (rp/expired-link))}]
      ["/cb/:payload" {:get (fn [{{:keys [payload]} :path-params
+                                 {:keys [erro]} :params
                                  :as req}]
                              (rp/handle-callback
-                              crux-node
                               password
-                              payload))}]
+                              payload
+                              erro))}]
      ["/estabelece-senha" {:post (fn [{{:keys [payload pass1 pass2]} :params
                                        :as req}]
                                    (rp/reset-password crux-node
