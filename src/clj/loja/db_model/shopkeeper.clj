@@ -1,4 +1,3 @@
-
 (ns loja.db-model.shopkeeper
   (:require [clj-uuid :as uuid]
             [crux.api :as crux]
@@ -32,13 +31,20 @@
   (lcrux/update-entity
    crux-node
    eid
-   assoc :loja.shopkeeper/password (crypto/hash-password password)))
+   assoc :loja.shopkeeper/hashed-password (crypto/hash-password password)))
 
 (comment
 
   (def crux-node (crux/start-node {}))
+  ;; or
 
-  (add-shopkeeper crux-node "Manolo Gomes" "manolo@gomes.gal")
+  (set-password
+   crux-node
+   (add-shopkeeper
+    crux-node
+    "Manolo Gomes"
+    "euccastro@gmail.com")
+   "abracadabra")
 
   (lcrux/close crux-node)
   )

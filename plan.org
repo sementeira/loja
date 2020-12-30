@@ -1,15 +1,6 @@
 * stack
 ** use cases
-*** encriptar umha cousa
-**** usar buddy
 *** acrescentar administrador
-**** fazê-lo realmente
-***** só precisamos jeito programático de fazê-lo
-      loja.ops/add-shopkeeper
-****** acrescenta o shopkeeper à DB, sem hashed password
-****** envia um email para reset password
-******* o email contem um código que é base64-encoded encrypted username
-        [:shopkeeper-set-pass <crux-db-id>]
 **** mock it to test other stuff
 *** acrescentar categoria?
     só programaticamente, por enquanto.
