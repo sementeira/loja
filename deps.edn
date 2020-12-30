@@ -35,4 +35,4 @@
    :main-opts   ["-m" "cloverage.coverage"
                  "--src-ns-path" "src/clj"
                  "--test-ns-path" "test/clj"
-                 "--ns-exclude-regex" "loja\\.email|loja\\.ops"]}}}
+                 "--ns-exclude-regex" "loja\\.(email|ops|reset-password|system|web)"]}}}
