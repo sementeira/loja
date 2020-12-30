@@ -1,24 +1,9 @@
 (ns loja.ops
   (:require [loja.db-model.shopkeeper :as db-sk]
-            [loja.crypto :as crypto]
-            [loja.email :as email]))
-
-(def one-day-ms (* 1000 60 60 24))
-
-(def expiration-days 3)
-
-(def ^:private msg
-  (format
-   "Olá,
-
-Para criar a tua senha clica no seguinte endereço (caduca em %s dias):
-
-"
-   expiration-days))
-
+            [loja.email :as email]
+            [loja.reset-password :as rp]))
 
 (defn add-shopkeeper [{:keys [callback-host
-                              callback-path
                               password]
                        :as system}
                       display-name
@@ -28,25 +13,21 @@ Para criar a tua senha clica no seguinte endereço (caduca em %s dias):
      system
      {:to email
       :subject "Invitaçom para atender a loja da Semente"
-      :body (str
-             msg
+      :body (rp/reset-password-body
              callback-host
-             callback-path
-             (crypto/urlsafe-encrypt
-              [:set-password
-               {:id eid
-                ;; XXX: make this the expiration, and refer to that in the
-                ;; message body.
-                :expiration (+ (System/currentTimeMillis)
-                               (* one-day-ms expiration-days))}]
-              password))})
+             eid
+             password)})
     (throw (ex-info "could not transact shopkeeper" {}))))
 
 (comment
   (require '[loja.config :as config])
   (require '[crux.api :as crux])
   (require '[loja.system :as system])
+
   (def node (:crux-node system/system))
+  ;; or
+  (def node (crux/start-node {}))
+
   (add-shopkeeper (assoc (config/load "dev")
                          :crux-node node)
                   "Manolo Peres"
