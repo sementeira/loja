@@ -1,8 +1,16 @@
 * stack
+** csrf protection
 ** test script
 *** criar nova tendeira
+**** csrf
 *** restabelecer senha
-** csrf protection
+**** csrf
+** estilo
+*** criar nova tendeira > estabelecer senha
+**** e respostas possíveis
+*** restabelecer senha após esquecê-la
+**** e respostas possíveis
+** ordear reset_password.clj por use case
 ** logging
 ** use cases
 *** acrescentar categoria?
