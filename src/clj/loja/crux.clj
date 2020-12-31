@@ -27,11 +27,17 @@
                               :crux.db/fn body}])))
     (sync-tx crux-node)))
 
-(defn q [crux-node query]
-  (crux/q (crux/db crux-node) query))
+(defn q
+  ([crux-node query]
+   (q crux-node query nil))
+  ([crux-node query args]
+   (crux/q (crux/db crux-node) query args)))
 
-(defn q1 [crux-node query]
-  (ffirst (q crux-node query)))
+(defn q1
+  ([crux-node query]
+   (q1 crux-node query nil))
+  ([crux-node query args]
+   (ffirst (q crux-node query args))))
 
 (defn update-entity [crux-node eid f & args]
   (let [e (crux/entity (crux/db crux-node) eid)]

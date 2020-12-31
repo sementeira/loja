@@ -1,70 +1,83 @@
 (ns loja.reset-password
   (:require
+   [buddy.hashers :as hashers]
    [loja.crypto :as crypto]
    [loja.db-model.shopkeeper :as db-sk]
    [loja.email :as email]
    [loja.layout :refer [html5-ok]]
    [ring.util.http-response :refer [see-other]]
-   [buddy.hashers :as hashers]))
+   [taoensso.timbre :as log]))
 
-(def one-day-ms (* 1000 60 60 24))
+(def one-hour-ms (* 1000 60 60))
+(def one-day-ms (* one-hour-ms 24))
 
-(def expiration-days 3)
+(def initial-set-expiration (* 3 one-day-ms))
+(def recovery-expiration one-hour-ms)
 
 (def ^:private msg
-  (format
-   "Olá,
+  "Olá,
 
-Para estabelecer a tua senha clica no seguinte endereço (caduca em %s dias):
+Para estabelecer a tua senha clica no seguinte endereço (caduca em %s):
 
-"
-   expiration-days))
+")
+
+(defn display-ms [ms]
+  (let [hours (quot ms one-hour-ms)
+        days (quot hours 24)
+        hours (mod hours 24)
+        days? (not (zero? days))
+        hours? (not (zero? hours))]
+    (str
+     (when days?
+       (str days " dia" (when (> days 1) "s")))
+     (when (and days? hours?)
+       " e ")
+     (when hours?
+       (str hours " hora" (when (> hours 1) "s"))))))
 
 (defn reset-password-body
-  [callback-host eid password dbg-expired?]
+  [callback-host eid password expiration-ms]
   (str
-   msg
+   (format msg (display-ms expiration-ms))
    callback-host
    "/cb/"
    (crypto/urlsafe-encrypt
     [:set-password
      {:id eid
       :expiration (+ (System/currentTimeMillis)
-                     (if dbg-expired?
-                       -1
-                       (* one-day-ms expiration-days)))}]
+                     expiration-ms)}]
     password)))
 
 (defn send-reset-email [{:keys [callback-host
                                 password]
                          :as system}
                         email
+                        subject
                         eid
-                        dbg-expired?]
+                        expiration]
   (email/send-email
    system
    {:to email
-    :subject "Invitaçom para atender a loja da Semente"
+    :subject subject
     :body (reset-password-body
            callback-host
            eid
            password
-           dbg-expired?)}))
+           expiration)}))
 
 (defn add-shopkeeper
   "To call from the REPL"
-  ([system display-name email]
-   (add-shopkeeper system display-name email false))
-  ([{:keys [callback-host
-            crux-node
-            password]
-     :as system}
-    display-name
-    email
-    dbg-expired?]
-   (if-let [eid (db-sk/add-shopkeeper crux-node display-name email)]
-     (send-reset-email system email eid dbg-expired?)
-     (throw (ex-info "could not transact shopkeeper" {})))))
+  [{:keys [crux-node]
+    :as system}
+   display-name
+   email]
+  (if-let [eid (db-sk/add-shopkeeper crux-node display-name email)]
+    (send-reset-email
+     system email
+     "Invitaçom para atender a loja da Semente"
+     eid
+     initial-set-expiration)
+    (throw (ex-info "could not transact shopkeeper" {}))))
 
 (def errors
   {"nom-quadram" "As senhas nom quadram"})
@@ -116,6 +129,38 @@ Para estabelecer a tua senha clica no seguinte endereço (caduca em %s dias):
             [[:h1 "Ligaçom caducada"]
              [:p "Passou o dia, passou a romaria."]]))
 
+(defn forgotten-password [error]
+  (html5-ok
+   "Recupera a tua senha"
+   [[:h1 "Recupera a tua senha"]
+    [:div "Di-me o teu email e mando-che umha ligaçom para restabelecer a tua senha."]
+    (when error [:div {:style "color: red"} (errors error)])
+    [:form {:method :post
+            :action "/esquecim-senha"}
+     [:div
+      [:label {:for "email"} "Email"]
+      [:input#email {:type :email :name "email"}]]
+     [:div
+      [:input {:type :submit :value "Enviar"}]]]]))
+
+(defn send-recovery-email [{:keys [crux-node] :as system} email]
+  (if-let [eid (db-sk/by-email crux-node email)]
+    (do (log/info "Sending recovery email to" email)
+        (send-reset-email
+         system
+         email
+         "Restabelece a tua senha"
+         eid
+         recovery-expiration))
+    (log/info "Not sending recovery email to unknown email" (pr-str email)))
+  (see-other "/email-enviado"))
+
+
+(defn email-sent []
+  (html5-ok "Email Enviado"
+            [[:h1 "Email Enviado"]
+             [:div "Se esse endereço dá certo, há-che chegar um email com instruçons para restabelecer a tua senha."]]))
+
 (comment
   (do
     (require '[loja.config :as config])
@@ -145,19 +190,12 @@ Para estabelecer a tua senha clica no seguinte endereço (caduca em %s dias):
                              :crux-node node)
                       email
                       eid
-                      false))
+                      initial-set-expiration))
 
   (add-shopkeeper (assoc (config/load "dev")
                          :crux-node node)
                   "Manolo Peres"
                   "euccastro@gmail.com")
-
-  ;; to test expiration
-  (add-shopkeeper (assoc (config/load "dev")
-                         :crux-node node)
-                  "Manolo Peres"
-                  "euccastro@gmail.com"
-                  true)
 
   (.close node)
   )

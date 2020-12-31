@@ -18,10 +18,15 @@
   (html5-ok "Echo" [[:div "Prova três"]
                     [:pre (with-out-str (pprint req))]]))
 
-(defn routes [crux-node password]
+(defn routes [{:keys [crux-node password] :as config}]
   (rring/ring-handler
    (rring/router
     [["/echo" {:get #(echo crux-node %)}]
+     ["/esquecim-senha" {:get (fn [{{:keys [erro]} :params}]
+                                (rp/forgotten-password erro))
+                         :post (fn [{{:keys [email]} :params}]
+                                 (rp/send-recovery-email config email))}]
+     ["/email-enviado" {:get (fn [_] (rp/email-sent))}]
      ["/caducada" {:get (fn [_] (rp/expired-link))}]
      ["/cb/:payload" {:get (fn [{{:keys [payload]} :path-params
                                  {:keys [erro]} :params
@@ -40,16 +45,16 @@
    (rring/create-default-handler
     {:not-found (constantly (not-found "Que?"))})))
 
-(defn handler [crux-node password]
-  (-> (routes crux-node password)
+(defn handler [config]
+  (-> (routes config)
       wrap-keyword-params
       wrap-params))
 
 (defn dev-handler
   "Creates the handler for every request, for REPL friendliness"
-  [crux-node password]
+  [config]
   (fn [req]
-    ((handler crux-node password) req)))
+    ((handler config) req)))
 
 (defn start-server [http-port http-handler]
   (let [port (or http-port 62000)]

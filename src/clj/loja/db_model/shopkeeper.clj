@@ -33,11 +33,23 @@
    eid
    assoc :loja.shopkeeper/hashed-password (crypto/hash-password password)))
 
+(defn by-email [crux-node email]
+  (lcrux/q1
+   crux-node
+   '{:find [eid]
+     :in [email]
+     :where [[eid :loja.shopkeeper/email email]]}
+   email))
+
 (comment
 
   (def crux-node (crux/start-node {}))
   ;; or
+  (do
+    (require '[loja.system :as system])
+    (def crux-node (:crux-node system/system)))
 
+  (by-email crux-node "euccastro@gmail.com")
   (set-password
    crux-node
    (add-shopkeeper

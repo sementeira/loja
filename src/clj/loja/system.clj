@@ -7,11 +7,11 @@
                      dev-http-handler?
                      http-port
                      password
-                     dev-scenarios]}]
+                     dev-scenarios]
+              :as config}]
   (let [crux-node (crux/crux-node crux-dir)
         handler ((if dev-http-handler? web/dev-handler web/handler)
-                 crux-node
-                 password)
+                 (assoc config :crux-node crux-node))
         http-server (web/start-server http-port handler)]
     (reduce
      (fn [acc f+args]

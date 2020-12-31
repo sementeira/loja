@@ -1,28 +1,31 @@
 * stack
+** test script
+*** criar nova tendeira
+*** restabelecer senha
+** csrf protection
+** logging
 ** use cases
-*** acrescentar administrador
-**** mock it to test other stuff
 *** acrescentar categoria?
-    só programaticamente, por enquanto.
+    só programaticamente, por enquanto?
+    si, em MVP minimizar o UI
 ** implementaçom
 *** um servidor em hetzner sobre crux com confluent backend
-*** images etc. em S3
-** mirar
-*** https://github.com/juxt/crux/blob/master/crux-test/test/crux/query_test.clj
-
+*** images etc. em S3 e/ou Google Drive?
+    google drive é gratis
+    de S3 podemo-las servir diretamente
 * estrategia
 
 ** progressom lógica
 *** primeiro acrescentamos tendeiras
-    como fazemos isto?  ao começo está bem se mo mandam fazer manualmente,
-    porque nom parece umha operaçom frequente. mais tenho que estar pronto para
-    haver mais do que umha tendeira.
-
     quem pode acrescentar tendeiras? para começar, eu (conetando diretamente à
     DB) ou [v2] outra tendeira (via web?)
 
     [v2] as tendeiras tamém podem editar os seus dados de contato sem
     consultar-me a mim?
+
+    mudar a senha é v1; quase temos todo o que precisamos
+    fazê-lo já ou quando faga login?
+    já, venha
 
     logo para umha [v1] só preciso umha funçom para acrescentar umha tendeira
     dado um nome e email
