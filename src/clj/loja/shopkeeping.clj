@@ -11,15 +11,21 @@
   (html5-ok
    "Cores"
    [[:h1 "Cores"]
-    (let [colors (db-color/get-colors crux-node)]
-      (for [{:keys [loja.color/name loja.color/color]} colors]
-        [:div
-         [:div [:p
-                [:span {:style (str "background-color:#" color)}
-                 "&nbsp;&nbsp;&nbsp;"] "&nbsp; " name]]]))
+
     [:form {:method "post"
             :action "/cor"}
      [:input {:type "hidden" :name "csrf-token" :value *anti-forgery-token*}]
+     (let [colors (sort-by
+                   :loja.color/name
+                   (db-color/get-colors crux-node))]
+       (for [{:keys [crux.db/id loja.color/name loja.color/color]} colors]
+         [:div
+          [:input {:name (str "cor-" id)
+                   :type "color"
+                   :value (str "#" color)}]
+          name
+          [:a {:href (str "/apaga-cor?cor=" id)}
+           "Apagar"]]))
      [:div
       [:label "Nome"
        [:input {:type "text" :name "nome" :required true}]]]
