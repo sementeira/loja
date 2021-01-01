@@ -10,10 +10,12 @@
                      dev-scenarios]
               :as config}]
   (let [crux-node (crux/crux-node crux-dir)
+        handler-config (assoc config
+                              :crux-node crux-node
+                              :override-logged-in-as (atom nil)
+                              :session-store (cookie-store))
         handler ((if dev-http-handler? web/dev-handler web/handler)
-                 (assoc config
-                        :crux-node crux-node
-                        :session-store (cookie-store)))
+                 handler-config)
         http-server (web/start-server http-port handler)]
     (reduce
      (fn [acc f+args]
@@ -28,6 +30,7 @@
           acc
           args)))
      {:crux-node crux-node
+      :handler-config handler-config
       :http-server http-server}
      dev-scenarios)))
 

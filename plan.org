@@ -1,5 +1,6 @@
 * stack
-** authentication
+** fake authentication
+*** logged-in-as
 ** use cases
 *** acrescentar categoria?
     só programaticamente, por enquanto?

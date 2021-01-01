@@ -72,7 +72,14 @@
       (log/info "response" (pr-str req) (pr-str response))
       response)))
 
-(defn handler [config]
+(defn override-login [handler eid]
+  (if eid
+    (fn [req]
+      (handler (assoc-in req [:session :identity] eid)))
+    handler))
+
+(defn handler [{:keys [override-logged-in-as]
+                :as config}]
   (-> (routes config)
       wrap-log
       auth/wrap-auth
@@ -80,6 +87,7 @@
        {:read-token (fn [req]
                       (or (get-in req [:params :csrf-token])
                           (get-in req [:body-params :csrf-token])))})
+      (override-login @override-logged-in-as)
       (wrap-session {:store (:session-store config)})
       wrap-keyword-params
       wrap-params))
