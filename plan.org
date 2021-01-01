@@ -13,7 +13,10 @@
     de S3 podemo-las servir diretamente
 * estrategia
 
+** em que altura acrescentamos SPA?
+*** ir tirando com MPA enquanto puidermos
 ** progressom lógica
+
 *** primeiro acrescentamos tendeiras
     quem pode acrescentar tendeiras? para começar, eu (conetando diretamente à
     DB) ou [v2] outra tendeira (via web?)

@@ -105,20 +105,17 @@
 
 (def color
   [:map
-   [:crux.db/id keyword?]
+   [:crux.db/id uuid?]
    [:loja.color/name nestr]
-   [:loja.color/r color-val]
-   [:loja.color/g color-val]
-   [:loja.color/b color-val]])
+   [:loja.color/color #"^[0-9a-f]{6}$"]])
 
 (def color? (m/validator color))
+(def color-explainer (m/explainer color))
 
 (comment
-  (color? {:crux.db/id :vermelho
+  (color? {:crux.db/id (uuid/v1)
            :loja.color/name "vermelho"
-           :loja.color/r 255
-           :loja.color/g 24
-           :loja.color/b 0})
+           :loja.color/color "00faff"})
   )
 
 (def size

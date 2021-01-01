@@ -20,7 +20,7 @@
      [:input {:type "hidden" :name "csrf-token" :value *anti-forgery-token*}]
      [:input {:type "hidden" :name "redirigir-a" :value redirect-to}]
      [:div
-      [:label "Nome"
+      [:label "Email"
        [:input {:type "email" :name "email" :required true}]]]
      [:div
       [:label "Senha"

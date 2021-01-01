@@ -4,6 +4,7 @@
    [loja.auth :as auth]
    [loja.layout :refer [html5-ok]]
    [loja.reset-password :as rp]
+   [loja.shopkeeping :as sk]
    [reitit.ring :as rring]
    [ring.adapter.jetty :as jetty]
    [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
@@ -24,7 +25,8 @@
    (rring/router
     [["/echo" {:get #(echo %)}]
      (auth/routes config)
-     (rp/routes config)])
+     (rp/routes config)
+     (sk/routes config)])
    (rring/create-default-handler
     {:not-found (constantly (not-found "Que?"))})))
 
