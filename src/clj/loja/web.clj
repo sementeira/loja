@@ -20,6 +20,12 @@
   (html5-ok "Echo" [[:div "Prova quatro"]
                     [:pre (with-out-str (pprint req))]]))
 
+(defn app [_]
+  (html5-ok "Loja da Semente"
+            [[:div#app]
+             [:script {:src "/js/main.js"}]
+             [:script "loja.app.init();"]]))
+
 (defn routes [config]
   (rring/ring-handler
    (rring/router
@@ -27,8 +33,11 @@
      (auth/routes config)
      (rp/routes config)
      (sk/routes config)])
-   (rring/create-default-handler
-    {:not-found (constantly (not-found "Que?"))})))
+   (rring/routes
+    (rring/create-resource-handler
+     {:path "/"})
+    (rring/create-default-handler
+     {:not-found app}))))
 
 (defn wrap-log [handler]
   (fn [req]

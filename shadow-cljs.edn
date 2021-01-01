@@ -1,0 +1,7 @@
+;; shadow-cljs configuration
+{:deps {:aliases [:shadow-cljs :cljs-dev]}
+ :builds
+ {:app {:target :browser
+        :output-dir "resources/public/js"
+        :asset-path "/js"
+        :modules {:main {:entries [loja.app]}}}}}

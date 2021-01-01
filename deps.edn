@@ -8,6 +8,7 @@
         hiccup/hiccup {:mvn/version "1.0.5"}
         juxt/crux-core {:mvn/version "20.12-1.13.0-beta"}
         juxt/crux-lmdb {:mvn/version "20.12-1.13.0-alpha"}
+        kee-frame/kee-frame {:mvn/version "1.1.1" :exclusions [metosin/reitit-core]}
         metosin/muuntaja {:mvn/version "0.6.7"}
         metosin/malli {:mvn/version "0.2.1"}
         metosin/reitit {:mvn/version "0.5.11"}
@@ -36,4 +37,7 @@
    :main-opts   ["-m" "cloverage.coverage"
                  "--src-ns-path" "src/clj"
                  "--test-ns-path" "test/clj"
-                 "--ns-exclude-regex" "loja\\.(email|ops|reset-password|system|web)"]}}}
+                 "--ns-exclude-regex" "loja\\.(email|ops|reset-password|system|web)"]}
+  :shadow-cljs
+  {:replace-paths ["src/cljs" "src/cljc"]
+   :extra-deps {thheller/shadow-cljs {:mvn/version "2.11.11"}}}}}
