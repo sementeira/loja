@@ -170,6 +170,29 @@ Para estabelecer a tua senha clica no seguinte endereço (caduca em %s):
             [[:h1 "Ligaçom caducada"]
              [:p "Passou o dia, passou a romaria."]]))
 
+(defn routes [{:keys [crux-node password]
+               :as config}]
+  [""
+   ["/esquecim-senha" {:get (fn [{{:keys [erro]} :params}]
+                              (forgotten-password erro))
+                       :post (fn [{{:keys [email]} :params}]
+                               (send-recovery-email config email))}]
+   ["/email-enviado" {:get (fn [_] (email-sent))}]
+   ["/caducada" {:get (fn [_] (expired-link))}]
+   ["/cb/:payload" {:get (fn [{{:keys [payload]} :path-params
+                               {:keys [erro]} :params
+                               :as req}]
+                           (handle-callback
+                            password
+                            payload
+                            erro))}]
+   ["/estabelece-senha" {:post (fn [{{:keys [payload pass1 pass2]} :params
+                                     :as req}]
+                                 (reset-password crux-node
+                                                 password
+                                                 payload
+                                                 pass1
+                                                 pass2))}]])
 (comment
   (do
     (require '[loja.config :as config])

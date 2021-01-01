@@ -1,7 +1,8 @@
 * stack
-** fake authentication
-*** logged-in-as
 ** use cases
+*** acrescentar cor
+**** color picker
+     input type=color
 *** acrescentar categoria?
     só programaticamente, por enquanto?
     si, em MVP minimizar o UI

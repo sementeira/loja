@@ -16,52 +16,15 @@
 
 
 (defn echo [req]
-  (html5-ok "Echo" [[:div "Prova"]
+  (html5-ok "Echo" [[:div "Prova quatro"]
                     [:pre (with-out-str (pprint req))]]))
 
-(defn routes [{:keys [crux-node password] :as config}]
+(defn routes [config]
   (rring/ring-handler
    (rring/router
     [["/echo" {:get #(echo %)}]
-     ["/entrar"
-      {:get (fn [{{:keys [redirigir-a]} :params
-                  :as req}]
-              (auth/login redirigir-a))
-       :post (fn [req]
-               (auth/handle-login crux-node req))}]
-     ["/sair"
-      {:get (fn [_]
-              (auth/logout))
-       :post @#'auth/handle-logout}]
-     ["/abur"
-      {:get (fn [_] (auth/bye))}]
-     ["/boas-vindas" {:middleware [auth/wrap-restricted]
-                      :get (fn [req]
-                             (auth/boas-vindas
-                              crux-node
-                              (-> req :session :identity)))}]
-     ["/restringido" {:middleware [auth/wrap-restricted]
-                      :get (constantly (html5-ok "Entrastes!" [[:h1 "Mobiám!"]]))}]
-     ["/esquecim-senha" {:get (fn [{{:keys [erro]} :params}]
-                                (rp/forgotten-password erro))
-                         :post (fn [{{:keys [email]} :params}]
-                                 (rp/send-recovery-email config email))}]
-     ["/email-enviado" {:get (fn [_] (rp/email-sent))}]
-     ["/caducada" {:get (fn [_] (rp/expired-link))}]
-     ["/cb/:payload" {:get (fn [{{:keys [payload]} :path-params
-                                 {:keys [erro]} :params
-                                 :as req}]
-                             (rp/handle-callback
-                              password
-                              payload
-                              erro))}]
-     ["/estabelece-senha" {:post (fn [{{:keys [payload pass1 pass2]} :params
-                                       :as req}]
-                                   (rp/reset-password crux-node
-                                                      password
-                                                      payload
-                                                      pass1
-                                                      pass2))}]])
+     (auth/routes config)
+     (rp/routes config)])
    (rring/create-default-handler
     {:not-found (constantly (not-found "Que?"))})))
 

@@ -86,3 +86,26 @@
 
 (defn bye []
   (html5-ok "Abur" [[:h1 "Abur!"] [:p "Já estás fora."]]))
+
+(defn routes [{:keys [crux-node] :as config}]
+  [""
+   ["/entrar"
+    {:get (fn [{{:keys [redirigir-a]} :params
+                :as req}]
+            (login redirigir-a))
+     :post (fn [req]
+             (handle-login crux-node req))}]
+   ["/sair"
+    {:get (fn [_]
+            (logout))
+     :post @#'handle-logout}]
+   ["/abur"
+    {:get (fn [_] (bye))}]
+   ["/boas-vindas" {:middleware [wrap-restricted]
+                    :get (fn [req]
+                           (boas-vindas
+                            crux-node
+                            (-> req :session :identity)))}]
+   ["/restringido" {:middleware [wrap-restricted]
+                    :get (constantly (html5-ok "Entrastes!" [[:h1 "Mobiám!"]]))}]
+   ])
