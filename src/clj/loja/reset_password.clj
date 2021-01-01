@@ -83,6 +83,40 @@ Para estabelecer a tua senha clica no seguinte endereço (caduca em %s):
 (def errors
   {"nom-quadram" "As senhas nom quadram"})
 
+(defn forgotten-password [error]
+  (html5-ok
+   "Recupera a tua senha"
+   [[:h1 "Recupera a tua senha"]
+    [:div "Di-me o teu email e mando-che umha ligaçom para restabelecer a tua senha."]
+    (when error [:div {:style "color: red"} (errors error)])
+    [:form {:method :post
+            :action "/esquecim-senha"}
+     [:input {:type "hidden"
+              :name "csrf-token"
+              :value *anti-forgery-token*}]
+     [:div
+      [:label {:for "email"} "Email"]
+      [:input#email {:type :email :name "email"}]]
+     [:div
+      [:input {:type :submit :value "Enviar"}]]]]))
+
+(defn send-recovery-email [{:keys [crux-node] :as system} email]
+  (if-let [eid (db-sk/by-email crux-node email)]
+    (do (log/info "Sending recovery email to" email)
+        (send-reset-email
+         system
+         email
+         "Restabelece a tua senha"
+         eid
+         recovery-expiration))
+    (log/info "Not sending recovery email to unknown email" (pr-str email)))
+  (see-other "/email-enviado"))
+
+(defn email-sent []
+  (html5-ok "Email Enviado"
+            [[:h1 "Email Enviado"]
+             [:div "Se esse endereço dá certo, há-che chegar um email com instruçons para restabelecer a tua senha."]]))
+
 (defn handle-callback [password payload error]
   (let [[op {:keys [expiration]}]
         (crypto/decrypt-urlsafe payload password)]
@@ -134,41 +168,6 @@ Para estabelecer a tua senha clica no seguinte endereço (caduca em %s):
   (html5-ok "Ligaçom caducada"
             [[:h1 "Ligaçom caducada"]
              [:p "Passou o dia, passou a romaria."]]))
-
-(defn forgotten-password [error]
-  (html5-ok
-   "Recupera a tua senha"
-   [[:h1 "Recupera a tua senha"]
-    [:div "Di-me o teu email e mando-che umha ligaçom para restabelecer a tua senha."]
-    (when error [:div {:style "color: red"} (errors error)])
-    [:form {:method :post
-            :action "/esquecim-senha"}
-     [:input {:type "hidden"
-              :name "csrf-token"
-              :value *anti-forgery-token*}]
-     [:div
-      [:label {:for "email"} "Email"]
-      [:input#email {:type :email :name "email"}]]
-     [:div
-      [:input {:type :submit :value "Enviar"}]]]]))
-
-(defn send-recovery-email [{:keys [crux-node] :as system} email]
-  (if-let [eid (db-sk/by-email crux-node email)]
-    (do (log/info "Sending recovery email to" email)
-        (send-reset-email
-         system
-         email
-         "Restabelece a tua senha"
-         eid
-         recovery-expiration))
-    (log/info "Not sending recovery email to unknown email" (pr-str email)))
-  (see-other "/email-enviado"))
-
-
-(defn email-sent []
-  (html5-ok "Email Enviado"
-            [[:h1 "Email Enviado"]
-             [:div "Se esse endereço dá certo, há-che chegar um email com instruçons para restabelecer a tua senha."]]))
 
 (comment
   (do

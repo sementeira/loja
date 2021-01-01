@@ -1,5 +1,4 @@
 * stack
-** csrf protection
 ** test script
 *** criar nova tendeira
 **** csrf
