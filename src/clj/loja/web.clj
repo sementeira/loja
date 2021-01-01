@@ -1,6 +1,7 @@
 (ns loja.web
   (:require
    [clojure.pprint :refer [pprint]]
+   [loja.auth :as auth]
    [loja.layout :refer [html5-ok]]
    [loja.reset-password :as rp]
    [reitit.ring :as rring]
@@ -14,14 +15,33 @@
   (:import [org.eclipse.jetty.server Server]))
 
 
-(defn echo [crux-node req]
+(defn echo [req]
   (html5-ok "Echo" [[:div "Prova"]
                     [:pre (with-out-str (pprint req))]]))
 
 (defn routes [{:keys [crux-node password] :as config}]
   (rring/ring-handler
    (rring/router
-    [["/echo" {:get #(echo crux-node %)}]
+    [["/echo" {:get #(echo %)}]
+     ["/entrar"
+      {:get (fn [{{:keys [redirigir-a]} :params
+                  :as req}]
+              (auth/login redirigir-a))
+       :post (fn [req]
+               (auth/handle-login crux-node req))}]
+     ["/sair"
+      {:get (fn [_]
+              (auth/logout))
+       :post @#'auth/handle-logout}]
+     ["/abur"
+      {:get (fn [_] (auth/bye))}]
+     ["/boas-vindas" {:middleware [auth/wrap-restricted]
+                      :get (fn [req]
+                             (auth/boas-vindas
+                              crux-node
+                              (-> req :session :identity)))}]
+     ["/restringido" {:middleware [auth/wrap-restricted]
+                      :get (constantly (html5-ok "Entrastes!" [[:h1 "Mobiám!"]]))}]
      ["/esquecim-senha" {:get (fn [{{:keys [erro]} :params}]
                                 (rp/forgotten-password erro))
                          :post (fn [{{:keys [email]} :params}]
@@ -55,6 +75,7 @@
 (defn handler [config]
   (-> (routes config)
       wrap-log
+      auth/wrap-auth
       (wrap-anti-forgery
        {:read-token (fn [req]
                       (or (get-in req [:params :csrf-token])

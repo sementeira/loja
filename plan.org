@@ -1,5 +1,5 @@
 * stack
-** logging
+** authentication
 ** use cases
 *** acrescentar categoria?
     só programaticamente, por enquanto?

@@ -41,6 +41,14 @@
      :where [[eid :loja.shopkeeper/email email]]}
    email))
 
+(defn get-hashed-password [crux-node eid]
+  (lcrux/q1
+   crux-node
+   '{:find [pass]
+     :in [eid]
+     :where [[eid :loja.shopkeeper/hashed-password pass]]}
+   eid))
+
 (comment
 
   (def crux-node (crux/start-node {}))
