@@ -72,6 +72,7 @@ Para estabelecer a tua senha clica no seguinte endereço (caduca em %s):
     :as system}
    display-name
    email]
+  (log/info "add-shopkeeper" display-name email)
   (if-let [eid (db-sk/add-shopkeeper crux-node display-name email)]
     (send-reset-email
      system email

@@ -1,15 +1,4 @@
 * stack
-** test script
-*** criar nova tendeira
-**** csrf
-*** restabelecer senha
-**** csrf
-** estilo
-*** criar nova tendeira > estabelecer senha
-**** e respostas possíveis
-*** restabelecer senha após esquecê-la
-**** e respostas possíveis
-** ordear reset_password.clj por use case
 ** logging
 ** use cases
 *** acrescentar categoria?
@@ -139,3 +128,15 @@
     é opcional; hai cousas que nom tenhem tamanhos e tenhem peso
     podemos modelá-las como que tenhem um tamanho único?
     :default
+
+* test script (XXX)
+** criar nova tendeira
+*** csrf
+** restabelecer senha
+*** csrf
+
+* styling TODO
+** criar nova tendeira > estabelecer senha
+*** e respostas possíveis
+** restabelecer senha após esquecê-la
+*** e respostas possíveis

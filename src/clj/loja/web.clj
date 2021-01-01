@@ -9,7 +9,8 @@
    [ring.middleware.keyword-params :refer [wrap-keyword-params]]
    [ring.middleware.params :refer [wrap-params]]
    [ring.middleware.session :refer [wrap-session]]
-   [ring.util.http-response :refer [not-found]])
+   [ring.util.http-response :refer [not-found]]
+   [taoensso.timbre :as log])
   (:import [org.eclipse.jetty.server Server]))
 
 
@@ -44,8 +45,16 @@
    (rring/create-default-handler
     {:not-found (constantly (not-found "Que?"))})))
 
+(defn wrap-log [handler]
+  (fn [req]
+    (log/info "request" (pr-str req))
+    (let [response (handler req)]
+      (log/info "response" (pr-str req) (pr-str response))
+      response)))
+
 (defn handler [config]
   (-> (routes config)
+      wrap-log
       (wrap-anti-forgery
        {:read-token (fn [req]
                       (or (get-in req [:params :csrf-token])
