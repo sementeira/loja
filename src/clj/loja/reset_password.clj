@@ -5,6 +5,7 @@
    [loja.db-model.shopkeeper :as db-sk]
    [loja.email :as email]
    [loja.layout :refer [html5-ok]]
+   [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
    [ring.util.http-response :refer [see-other]]
    [taoensso.timbre :as log]))
 
@@ -88,24 +89,29 @@ Para estabelecer a tua senha clica no seguinte endereço (caduca em %s):
     (assert (= op :set-password))
     (if (< expiration (System/currentTimeMillis))
       (see-other "/caducada")
-      (html5-ok "Estabelece a tua senha"
-                [[:h1 "Estabelece a tua senha"]
-                 (when error [:div {:style "color: red"} (errors error)])
-                 [:form {:method :post
-                         :action "/estabelece-senha"}
-                  [:input#payload {:type :hidden
-                                   :name "payload"
-                                   :value payload}]
-                  [:div
-                   [:label {:for "pass1"} "Senha"]
-                   [:input#pass1 {:type :text
-                                  :name "pass1"}]]
-                  [:div
-                   [:label {:for "pass2"} "Confirma senha"]
-                   [:input#pass2 {:type :text
-                                  :name "pass2"}]]
-                  [:div
-                   [:input {:type :submit :value "Enviar"}]]]]))))
+      (html5-ok
+       "Estabelece a tua senha"
+       [[:h1 "Estabelece a tua senha"]
+        (when error [:div {:style "color: red"} (errors error)])
+        [:form {:method :post
+                :action "/estabelece-senha"}
+
+         [:input {:type "hidden"
+                  :name "csrf-token"
+                  :value *anti-forgery-token*}]
+         [:input {:type :hidden
+                  :name "payload"
+                  :value payload}]
+         [:div
+          [:label {:for "pass1"} "Senha"]
+          [:input#pass1 {:type :text
+                         :name "pass1"}]]
+         [:div
+          [:label {:for "pass2"} "Confirma senha"]
+          [:input#pass2 {:type :text
+                         :name "pass2"}]]
+         [:div
+          [:input {:type :submit :value "Enviar"}]]]]))))
 
 (defn reset-password [crux-node password payload pass1 pass2]
   (let [[op {:keys [id expiration]}]
@@ -137,6 +143,9 @@ Para estabelecer a tua senha clica no seguinte endereço (caduca em %s):
     (when error [:div {:style "color: red"} (errors error)])
     [:form {:method :post
             :action "/esquecim-senha"}
+     [:input {:type "hidden"
+              :name "csrf-token"
+              :value *anti-forgery-token*}]
      [:div
       [:label {:for "email"} "Email"]
       [:input#email {:type :email :name "email"}]]

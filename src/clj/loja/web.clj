@@ -5,17 +5,16 @@
    [loja.reset-password :as rp]
    [reitit.ring :as rring]
    [ring.adapter.jetty :as jetty]
-  #_ [ring.middleware.anti-forgery :refer [*anti-forgery-token*
-                                         wrap-anti-forgery]]
+   [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
    [ring.middleware.keyword-params :refer [wrap-keyword-params]]
    [ring.middleware.params :refer [wrap-params]]
-  #_ [ring.middleware.session :refer [wrap-session]]
+   [ring.middleware.session :refer [wrap-session]]
    [ring.util.http-response :refer [not-found]])
   (:import [org.eclipse.jetty.server Server]))
 
 
 (defn echo [crux-node req]
-  (html5-ok "Echo" [[:div "Prova três"]
+  (html5-ok "Echo" [[:div "Prova"]
                     [:pre (with-out-str (pprint req))]]))
 
 (defn routes [{:keys [crux-node password] :as config}]
@@ -47,6 +46,11 @@
 
 (defn handler [config]
   (-> (routes config)
+      (wrap-anti-forgery
+       {:read-token (fn [req]
+                      (or (get-in req [:params :csrf-token])
+                          (get-in req [:body-params :csrf-token])))})
+      (wrap-session {:store (:session-store config)})
       wrap-keyword-params
       wrap-params))
 

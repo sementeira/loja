@@ -1,17 +1,19 @@
 (ns loja.system
   (:require
    [loja.crux :as crux]
-   [loja.web :as web]))
+   [loja.web :as web]
+   [ring.middleware.session.cookie :refer [cookie-store]]))
 
 (defn start [{:keys [crux-dir
                      dev-http-handler?
                      http-port
-                     password
                      dev-scenarios]
               :as config}]
   (let [crux-node (crux/crux-node crux-dir)
         handler ((if dev-http-handler? web/dev-handler web/handler)
-                 (assoc config :crux-node crux-node))
+                 (assoc config
+                        :crux-node crux-node
+                        :session-store (cookie-store)))
         http-server (web/start-server http-port handler)]
     (reduce
      (fn [acc f+args]
